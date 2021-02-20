@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:aqueduct/aqueduct.dart';
 
-class HeroesController extends Controller {
+class HeroesController extends ResourceController {
   final _heroes = [
     {'id': 11, 'name': 'Mr. Nice'},
     {'id': 12, 'name': 'Narco'},
@@ -11,14 +11,14 @@ class HeroesController extends Controller {
     {'id': 15, 'name': 'Magneta'},
   ];
 
-  @override
-  FutureOr<RequestOrResponse> handle(Request request) {
-    if(request.path.variables.containsKey('id')) {
-      final id = int.parse(request.path.variables['id']);
-      final hero = _heroes.firstWhere((hero) => hero['id'] == id);
-      return (hero == null) ? Response.notFound() : Response.ok(hero);
-    }
-    return Response.ok(_heroes);
-  }
+  @Operation.get()
+  Future<Response> getAllHeroes() async => Response.ok(_heroes);
 
+  @Operation.get('id')
+  Future<Response> getHeroByID() async {
+    final id = int.parse(request.path.variables['id']);
+    final hero =
+        _heroes.firstWhere((hero) => hero['id'] == id, orElse: () => null);
+    return (hero == null) ? Response.notFound() : Response.ok(hero);
+  }
 }
